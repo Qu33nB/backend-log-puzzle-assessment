@@ -15,6 +15,7 @@ Here's what a puzzle url looks like:
 10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 
 """
+__author__ = 'Qu33nB'
 
 import os
 import re
@@ -29,19 +30,66 @@ def read_urls(filename):
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
     # +++your code here+++
-    pass
+    lst = []
+    # Opens file and searches for addresses with
+    # correct puzzle string and jpg tag
+    with open(filename) as file:
+        for line in file:
+            match = re.search('puzzle', line)
+            if match:
+                url = re.search(r'\S+puzzle+\S+.jpg', line)
+                if url:
+
+                    lst.append(url.group())
+    # Creates a set of "lst", removes all duplicates
+    set_lst = set(lst)
+    # Sorts list based on last four characters in address string
+    sorted_lst = sorted(list(set_lst), key=lambda x: x[-8:-4])
+    print("list sorted")
+    return sorted_lst
 
 
 def download_images(img_urls, dest_dir):
-    """Given the urls already in the correct order, downloads
-    each image into the given directory.
-    Gives the images local filenames img0, img1, and so on.
-    Creates an index.html in the directory
-    with an img tag to show each local image file.
+    """
     Creates the directory if necessary.
     """
     # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        path = 'mkdir -p {0}'.format(dest_dir)
+        os.system(path)
+        print("Path created.")
+    else:
+        print("Path exists.")
+
+    # For every image the urllib.urlretrieve runs and downloads
+    # the image into the specified folder.
+    print("Downloading images...")
+    image_tags = ""
+
+    for i, image_url in enumerate(img_urls):
+        print("Image", i, "downloaded!")
+        urllib.urlretrieve("http://code.google.com" + image_url, dest_dir
+                                                    + "/img"
+                                                    + str(i)
+                                                    + ".jpeg")
+        image_tags += """<img src='./{0}/img{1}{2}' /> """.format(dest_dir, str(i), ".jpeg")
+    print("Images downloaded!")
+
+    html = """
+            <html>
+            <head>
+            </head>
+                <body>
+                    <div style="display:flex;">
+                    {0}
+                    </div>
+                </body>
+            </html>
+            """.format(image_tags)
+
+    f = open('index.html', 'w')
+    f.write(html)
+    print("HTML created!")
 
 
 def create_parser():
